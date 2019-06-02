@@ -33,23 +33,6 @@ services:
     networks:
       - odfe-network
 
-  mqtt:
-    container_name: mqtt
-    image: eclipse-mosquitto:latest
-    user: "0"
-    ports:
-      - "1883:1883"
-      - "9001:9001"
-    volumes:
-      - ./conf/mqtt/:/mosquitto/config/
-      - ./data/mqtt/:/mosquitto/data/
-      - ./logs/mqtt/:/mosquitto/log/
-    restart: always
-    networks:
-      - odfe-network
-
-
-
 volumes:
   odfe-data:
 
