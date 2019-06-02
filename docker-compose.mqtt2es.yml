@@ -1,0 +1,29 @@
+version: '3.4'
+services:
+  mqtt:
+    container_name: mqtt
+    image: eclipse-mosquitto:latest
+    user: "0"
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./conf/mqtt/:/mosquitto/config/
+      - ./data/mqtt/:/mosquitto/data/
+      - ./logs/mqtt/:/mosquitto/log/
+    restart: always
+    networks:
+      - odfe-network
+
+  mqtt2es:
+    build:
+      context: .
+      dockerfile: ./mqtt2es/Dockerfile
+    image: mqtt2es
+    environment:
+      ELASTICSEARCH_USER:
+      ELASTICSEARCH_PASS: 
+      ELASTICSEARCH_HOSTS: https://odfe-node1:9200
+      MQTT_USER:
+      MQTT_PASS:
+      MQTT_HOST: 127.0.0.1
