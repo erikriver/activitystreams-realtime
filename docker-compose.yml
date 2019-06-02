@@ -45,6 +45,8 @@ services:
       - ./data/mqtt/:/mosquitto/data/
       - ./logs/mqtt/:/mosquitto/log/
     restart: always
+    networks:
+      - odfe-network
 
 
 
