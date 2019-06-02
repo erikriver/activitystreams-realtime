@@ -1,0 +1,55 @@
+version: '3.4'
+services:
+  odfe-node:
+    image: amazon/opendistro-for-elasticsearch:0.9.0
+    container_name: odfe-node
+    environment:
+      - cluster.name=odfe-cluster
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true # along with the memlock settings below, disables swapping
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - odfe-data:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+      - 9600:9600 # required for Performance Analyzer
+    networks:
+      - odfe-network
+
+  kibana:
+    image: amazon/opendistro-for-elasticsearch-kibana:0.9.0
+    container_name: odfe-kibana
+    ports:
+      - 5601:5601
+    expose:
+      - "5601"
+    environment:
+      ELASTICSEARCH_URL: https://odfe-node:9200
+      ELASTICSEARCH_HOSTS: https://odfe-node:9200
+    networks:
+      - odfe-network
+
+  mqtt:
+    container_name: mqtt
+    image: eclipse-mosquitto:latest
+    user: "0"
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./conf/mqtt/:/mosquitto/config/
+      - ./data/mqtt/:/mosquitto/data/
+      - ./logs/mqtt/:/mosquitto/log/
+    restart: always
+
+
+
+volumes:
+  odfe-data:
+
+networks:
+  odfe-network:
