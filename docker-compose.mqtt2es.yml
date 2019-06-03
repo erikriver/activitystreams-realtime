@@ -3,7 +3,10 @@ services:
   mqtt:
     container_name: mqtt
     image: eclipse-mosquitto:latest
-    user: "0"
+    hostname: mqtt
+    depends_on:
+      - odfe-node
+#    user: "0"
     ports:
       - "1883:1883"
       - "9001:9001"
@@ -20,10 +23,14 @@ services:
       context: .
       dockerfile: ./mqtt2es/Dockerfile
     image: mqtt2es
+    depends_on:
+      - mqtt
     environment:
-      ELASTICSEARCH_USER:
-      ELASTICSEARCH_PASS: 
-      ELASTICSEARCH_HOSTS: https://odfe-node1:9200
-      MQTT_USER:
-      MQTT_PASS:
-      MQTT_HOST: 127.0.0.1
+      - ELASTICSEARCH_USER=$ELASTICSEARCH_USER
+      - ELASTICSEARCH_PASS=$ELASTICSEARCH_PASS 
+      - ELASTICSEARCH_HOSTS=https://odfe-node1:9200
+      - MQTT_USER=$MQTT_USER
+      - MQTT_PASS=$MQTT_PASS
+      - MQTT_HOST=mqtt
+    networks:
+      - odfe-network

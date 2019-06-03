@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+
+__author__    = 'Erik Rivera <erik.river()gmail.com>'
+__copyright__ = 'Copyright 2019'
+__license__ = 'MIT'
+
 import os
 import ssl
 import json
@@ -7,10 +13,10 @@ from datetime import datetime
 import paho.mqtt.client as mqtt
 from elasticsearch import Elasticsearch
 
-# stdout
-def debug(msg):
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f') + " " + msg, flush=True)
 
+def debug(msg):
+    "stdout"
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f') + " " + msg, flush=True)
 
 def on_connect(client, userdata, flags, rc):
     """
@@ -20,7 +26,6 @@ def on_connect(client, userdata, flags, rc):
 
     # Subscribing in on_connect() means that if we lose the connection and
     # reconnect then subscriptions will be renewed.
-    # client.subscribe("$SYS/#")
 
     client.subscribe("#")
 
@@ -58,13 +63,16 @@ def on_message(client, userdata, message):
     msg_json.update({"status_type": status_type})
 
     debug("rx message on topic: " + str(message.topic))
-    es.index(index, "_doc", msg_json)
+    debug(str(msg_json))
+    # es.index(index, "_doc", msg_json)
 
 
 # Elasticsearch
 elasticsearch_user = os.environ["ELASTICSEARCH_USER"]
 elasticsearch_pass = os.environ["ELASTICSEARCH_PASS"]
 elasticsearch_host = os.environ["ELASTICSEARCH_HOSTS"]
+
+debug("elasticsearch_host: "+elasticsearch_host)
 
 es_conn = 0
 es = None
@@ -82,19 +90,20 @@ mqtt_pass = os.environ['MQTT_PASS']
 mqtt_host = os.environ['MQTT_HOST']
 
 client = mqtt.Client(client_id="Testclient", clean_session=True, userdata=None)
-client.tls_set(ca_certs=None, cert_reqs=ssl.CERT_NONE, tls_version=ssl.PROTOCOL_TLSv1_2, ciphers=None)
+#client.tls_set(ca_certs=None, cert_reqs=ssl.CERT_NONE, tls_version=ssl.PROTOCOL_TLSv1_2, ciphers=None)
+if mqtt_user is not '':
+    client.username_pw_set(mqtt_user, password=mqtt_pass)
+
 client.on_connect = on_connect
 client.on_message = on_message
-client.username_pw_set(mqtt_user, mqtt_pass)
 client.enable_logger(logger=None)
-client.connect(host=mqtt_host, port=8883, keepalive=60)
+client.connect(host=mqtt_host, port=1883, keepalive=60)
 
 # Blocking call that processes network traffic, dispatches callbacks and
 # handles reconnecting.
 # Other loop*() functions are available that give a threaded interface and a
 # manual interface.
 client.loop_forever()
-
 
 
 
